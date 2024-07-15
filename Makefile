@@ -1,8 +1,17 @@
-PYTHON := python
+PYTHON := python2
 .SUFFIXES: .asm .tx .o .gbc
 .PHONY: all clean red blue compare
 .SECONDEXPANSION:
 
+ifneq ($(wildcard rgbds/*),)
+RGBDS ?= rgbds
+else
+RGBDS ?= 
+endif
+RGBASM ?= $(RGBDS)/rgbasm
+RGBFIX ?= $(RGBDS)/rgbfix
+RGBGFX ?= $(RGBDS)/rgbgfx
+RGBLNK ?= $(RGBDS)/rgblink
 
 TEXTQUEUE :=
 
@@ -56,13 +65,13 @@ baserom.gbc: ;
 $(OBJS): $$*.tx $$(patsubst %.asm, %.tx, $$($$*_DEPENDENCIES))
 	@$(PYTHON) prequeue.py $(TEXTQUEUE)
 	@$(eval TEXTQUEUE :=)
-	rgbasm -o $@ $*.tx
+	$(RGBASM) -o $@ $*.tx
 
 pokered.gbc: $(RED_OBJS)
-	rgblink -n $*.sym -m $*.map -o $@ $^
-	rgbfix -jsv -k 01 -l 0x33 -m 0x13 -p 0 -r 03 -t "POKEMON RED" $@
+	$(RGBLNK) -n $*.sym -m $*.map -o $@ $^
+	$(RGBFIX) -jsv -k 01 -l 0x33 -m 0x13 -p 0 -r 03 -t "POKEMON RED" $@
 
 pokeblue.gbc: $(BLUE_OBJS)
-	rgblink -n $*.sym -m $*.map -o $@ $^
-	rgbfix -jsv -k 01 -l 0x33 -m 0x13 -p 0 -r 03 -t "POKEMON BLUE" $@
+	$(RGBLNK) -n $*.sym -m $*.map -o $@ $^
+	$(RGBFIX) -jsv -k 01 -l 0x33 -m 0x13 -p 0 -r 03 -t "POKEMON BLUE" $@
 
